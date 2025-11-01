@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'services/auth_service.dart';
+import 'widgets/auth_wrapper.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   runApp(EmotionDiaryApp());
@@ -11,8 +14,32 @@ class EmotionDiaryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '감정 다이어리',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: HomeScreen(),
+      theme: ThemeData(
+        primarySwatch: Colors.purple,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color(0xFF6C63FF),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF6C63FF),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => AuthWrapper(),
+        '/login': (context) => LoginScreen(),
+        '/home': (context) => HomeScreen(),
+        '/diary_write': (context) => DiaryWriteScreen(),
+        '/analysis': (context) => AnalysisScreen(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }
@@ -23,18 +50,192 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = AuthService.currentUser;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('감정 다이어리'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Color(0xFF6C63FF),
+        foregroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          // 프로필 메뉴
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              if (value == 'logout') {
+                // 로그아웃 확인 다이얼로그
+                final shouldLogout = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('로그아웃'),
+                      content: Text('정말 로그아웃하시겠습니까?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text('취소'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          style: TextButton.styleFrom(foregroundColor: Colors.red),
+                          child: Text('로그아웃'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                
+                if (shouldLogout == true) {
+                  await AuthService.signOut();
+                  Navigator.of(context).pushReplacementNamed('/');
+                }
+              } else if (value == 'profile') {
+                // 프로필 정보 다이얼로그
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('프로필 정보'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundImage: user?.profileImage != null
+                                ? NetworkImage(user!.profileImage!)
+                                : null,
+                            backgroundColor: Color(0xFF6C63FF),
+                            child: user?.profileImage == null
+                                ? Icon(Icons.person, color: Colors.white, size: 40)
+                                : null,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            user?.name ?? '사용자',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            user?.email ?? '',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text('닫기'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Color(0xFF6C63FF)),
+                    SizedBox(width: 8),
+                    Text('프로필'),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('로그아웃'),
+                  ],
+                ),
+              ),
+            ],
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundImage: user?.profileImage != null
+                    ? NetworkImage(user!.profileImage!)
+                    : null,
+                backgroundColor: Colors.white.withOpacity(0.2),
+                child: user?.profileImage == null
+                    ? Icon(Icons.person, color: Colors.white, size: 20)
+                    : null,
+              ),
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 사용자 인사말 카드
+            if (user != null)
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF6C63FF).withOpacity(0.1), Colors.white],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage: user.profileImage != null
+                            ? NetworkImage(user.profileImage!)
+                            : null,
+                        backgroundColor: Color(0xFF6C63FF),
+                        child: user.profileImage == null
+                            ? Icon(Icons.person, color: Colors.white, size: 30)
+                            : null,
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${user.name}님, 안녕하세요! 👋',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF6C63FF),
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              '오늘도 소중한 하루를 기록해보세요',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            
+            SizedBox(height: 16),
+            
             // 오늘의 감정 카드 - 백엔드 API: GET /api/emotion/today
             Container(
               width: double.infinity,
