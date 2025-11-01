@@ -33,7 +33,21 @@
 - 🤖 AI 감정 분석 연동
 - 📊 통계 및 차트 기능
 
-## 🚀 빠른 시작
+## 🌐 웹 데모 (백엔드 팀 추천!)
+
+### 🎯 **바로 체험하기** 
+> **Flutter 설치 없이 브라우저에서 바로 테스트 가능!**
+
+🔗 **라이브 데모**: https://junwoo906.github.io/emotion_diary_flutter/
+
+#### 📱 체험 방법
+1. 위 링크 클릭 → 브라우저에서 앱 로딩
+2. **"테스트 로그인하기"** 버튼 클릭
+3. **홈 화면**에서 사용자 정보 확인
+4. **메뉴**에서 각 기능 체험
+5. **개발자 도구 (F12) → Network 탭**에서 API 호출 확인 가능
+
+## 🚀 로컬 개발 환경 설정
 
 ### 1️⃣ 프로젝트 클론 및 설정
 ```bash
@@ -355,10 +369,55 @@ flutter run -d chrome
 static const bool _isTestMode = false; // true → false
 ```
 
+## 🛠️ 백엔드 팀을 위한 빠른 체험 가이드
+
+### ⚡ **Flutter 없이 바로 테스트** (추천!)
+1. 🌐 **웹 데모**: https://junwoo906.github.io/emotion_diary_flutter/
+2. **F12 → Network 탭** 열기
+3. **"테스트 로그인하기"** 클릭 → API 호출 패턴 확인
+4. 각 메뉴 클릭해서 **필요한 API 엔드포인트 파악**
+
+### 🔧 **로컬 Flutter 설치해서 테스트**
+```bash
+# 1. Flutter SDK 설치 (5분)
+# Windows: https://docs.flutter.dev/get-started/install/windows
+# 간단히 zip 파일 다운로드 → 압축해제 → PATH 추가
+
+# 2. 프로젝트 실행 (1분)
+git clone https://github.com/junwoo906/emotion_diary_flutter.git
+cd emotion_diary_flutter
+flutter pub get
+flutter run -d chrome
+
+# 3. 앱 체험
+# "테스트 로그인하기" → 홈 화면 → 각 메뉴 체험
+```
+
+### 📊 **백엔드 개발 시 우선순위**
+
+#### 🔥 **1단계: 기본 인증** (앱 실행에 필수)
+```http
+POST /api/auth/google     # 로그인
+GET  /api/user/profile    # 사용자 정보
+```
+
+#### 🔥 **2단계: 핵심 기능** (일기 앱 완성)
+```http
+POST /api/diary           # 일기 저장
+GET  /api/diaries/recent  # 일기 목록
+POST /api/emotion/analyze # 감정 분석 (Mock → Real AI 연동)
+```
+
+#### 🔥 **3단계: 부가 기능** (완성도 높이기)
+```http
+GET  /api/statistics/weekly    # 통계
+POST /api/feedback/generate    # AI 피드백
+```
+
 ## 🤝 백엔드 팀과의 협업
 
 ### 🔄 **현재 상황**
-- ✅ **프론트엔드**: 로그인 시스템 완료
+- ✅ **프론트엔드**: 로그인 시스템 완료, 웹 데모 배포 완료
 - 🔄 **백엔드**: API 엔드포인트 개발 필요
 - 🔄 **AI**: 감정 분석 모델 개발 필요
 
