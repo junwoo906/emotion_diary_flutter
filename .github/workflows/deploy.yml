@@ -32,7 +32,7 @@ jobs:
       run: flutter pub get
       
     - name: Build Flutter web
-      run: flutter build web --release
+      run: flutter build web --release --base-href /emotion_diary_flutter/
       
     - name: Setup Pages
       uses: actions/configure-pages@v4
